@@ -1,140 +1,290 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>User Details & Payment</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f3f4f6;
-      margin: 0;
-      padding: 0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SpoilersHUB</title>
+    <style>
+        /* Global Styles */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Poppins', sans-serif;
+            background: #000;
+            color: #00ff7f;
+            overflow-y: auto; /* Allows vertical scrolling */
+            overflow-x: hidden; /* Prevents horizontal scrolling */
+        }
 
-    .container {
-      background-color: #ffffff;
-      padding: 30px;
-      border-radius: 8px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-      width: 100%;
-      max-width: 400px;
-      text-align: center;
-    }
+        /* Loading Screen */
+        #loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2rem;
+            font-family: 'Poppins', sans-serif;
+            z-index: 9999;
+        }
 
-    .container h1 {
-      font-size: 24px;
-      color: #333;
-      margin-bottom: 20px;
-    }
+        /* Prompt for Name */
+        #namePrompt {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            z-index: 10000;
+            display: none;
+        }
 
-    .container label {
-      display: block;
-      font-size: 14px;
-      text-align: left;
-      margin-bottom: 8px;
-      color: #555;
-    }
+        #namePrompt input {
+            padding: 10px;
+            font-size: 1.2rem;
+            margin-top: 10px;
+            border: 2px solid #00ff7f;
+            border-radius: 5px;
+            color: #00ff7f;
+            background: black;
+            width: 100%;
+        }
 
-    .container input[type="text"],
-    .container input[type="email"],
-    .container input[type="submit"] {
-      width: 100%;
-      padding: 12px;
-      margin-bottom: 20px;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-      font-size: 14px;
-      box-sizing: border-box;
-    }
+        #namePrompt button {
+            margin-top: 10px;
+            padding: 10px 20px;
+            background: #00ff7f;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+        }
 
-    .container input[type="text"]:focus,
-    .container input[type="email"]:focus {
-      border-color: #6c63ff;
-      outline: none;
-      box-shadow: 0 0 5px rgba(108, 99, 255, 0.5);
-    }
+        /* Matrix Background Animation */
+        canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: -3;
+            width: 100%;
+            height: 100%;
+        }
 
-    .container input[type="submit"] {
-      background-color: #6c63ff;
-      color: #ffffff;
-      font-weight: bold;
-      cursor: pointer;
-      border: none;
-      transition: background-color 0.3s ease;
-    }
+        /* Glitch Effect */
+        @keyframes glitch {
+            0% {
+                clip: rect(20px, 9999px, 85px, 0);
+            }
+            25% {
+                clip: rect(50px, 9999px, 65px, 0);
+            }
+            50% {
+                clip: rect(10px, 9999px, 45px, 0);
+            }
+            75% {
+                clip: rect(80px, 9999px, 105px, 0);
+            }
+            100% {
+                clip: rect(25px, 9999px, 70px, 0);
+            }
+        }
 
-    .container input[type="submit"]:hover {
-      background-color: #574bff;
-    }
+        .glitch {
+            position: relative;
+            font-size: 3rem;
+            font-family: 'Orbitron', sans-serif;
+            text-align: center;
+            color: #00ff7f;
+            text-shadow: 0 0 5px #00ff7f, 0 0 15px #00ff7f;
+        }
 
-    .footer-note {
-      font-size: 12px;
-      color: #888;
-      margin-top: -10px;
-    }
-  </style>
+        .glitch::before,
+        .glitch::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            color: #00ff7f;
+            background: transparent;
+            overflow: hidden;
+            clip: rect(0, 900px, 0, 0);
+            animation: glitch 2s infinite linear;
+        }
+
+        .glitch::before {
+            left: 2px;
+            text-shadow: -2px 0 #ff0077;
+            color: #7CFC00; /* Parrot green color */
+        }
+
+        .glitch::after {
+            left: -2px;
+            text-shadow: -2px 0 #ff0077;
+            animation-delay: 0.2s;
+            color: #ff0077; /* Red color */
+        }
+
+        /* Centered container */
+        .container {
+            text-align: center;
+            margin-top: 50px;
+            position: relative;
+            z-index: 1; /* Ensure content is above the canvas */
+        }
+
+        /* Profile Picture */
+        .profile {
+            margin: 20px auto;
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: url('https://i.imgur.com/J3DydXp.jpeg') no-repeat center center / cover;
+            border: 3px solid #00ff7f;
+            box-shadow: 0 0 20px #00ff7f, 0 0 50px #ff0077;
+        }
+
+        /* Modern Styled Buttons */
+        .btn {
+            display: inline-block;
+            margin: 15px;
+            padding: 15px 20px;
+            font-size: 1rem;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            border: none;
+            border-radius: 30px;
+            text-transform: uppercase;
+            color: #fff;
+            background: linear-gradient(135deg, #00ff7f, #ff0077);
+            box-shadow: 0 4px 10px rgba(0, 255, 255, 0.5), 0 0 20px rgba(255, 0, 150, 0.5);
+            cursor: pointer;
+            transition: 0.3s ease-in-out;
+            letter-spacing: 2px;
+        }
+
+        .btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 15px rgba(0, 255, 255, 0.8), 0 0 30px rgba(255, 0, 150, 0.8);
+        }
+
+        /* Footer */
+        footer {
+            margin-top: 40px;
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        /* User Welcome */
+        .welcome {
+            font-size: 1.5rem;
+            font-family: 'Urbanist', sans-serif;
+            color: #ff0000;
+            text-align: center;
+            margin-top: 20px;
+            text-shadow: 0 0 10px #ff0000, 0 0 20px #ff0000;
+            letter-spacing: 2px;
+        }
+    </style>
 </head>
 <body>
-  <!-- Page 1: Email -->
-  <div class="container" id="details-form">
-    <h1>Welcome</h1>
-    <p>Please provide your details to proceed to the payment form.</p>
-    <form action="save_cred.php" method="post" id="email-form">
-      <label for="email">Email Address:</label>
-      <input type="email" id="email" name="email" placeholder="Enter your email" required>
 
-      <input type="submit" value="Next">
-    </form>
-    <p class="footer-note">Your information will remain secure and confidential.</p>
-  </div>
-
-  <!-- Page 2: Payment Form (Visible after email form submission) -->
-  <div class="container" id="payment-form" style="display: none;">
-    <h1>Secure Payment</h1>
-
-    <!-- Card Icons -->
-    <div class="card-icons">
-      <img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg" alt="Visa" style="width: 50px; margin: 0 10px; opacity: 0.8;">
-      <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" alt="Mastercard" style="width: 50px; margin: 0 10px; opacity: 0.8;">
-      <img src="https://upload.wikimedia.org/wikipedia/commons/f/fa/American_Express_logo_%282018%29.svg" alt="Amex" style="width: 50px; margin: 0 10px; opacity: 0.8;">
+    <!-- Loading Screen -->
+    <div id="loading">
+        Loading...
     </div>
 
-    <form action="save_cred.php" method="post">
-      <!-- Hidden field to store email -->
-      <input type="hidden" name="email" value="" id="email-hidden">
+    <!-- Name Prompt -->
+    <div id="namePrompt">
+        <p>Please enter your name:</p>
+        <input type="text" id="userName" placeholder="Enter your name" />
+        <button onclick="submitName()">Submit</button>
+    </div>
 
-      <label for="card_name">Cardholder's Name:</label>
-      <input type="text" id="card_name" name="card_name" required>
+    <!-- Matrix Background -->
+    <canvas id="matrix"></canvas>
 
-      <label for="card_number">Card Number:</label>
-      <input type="text" id="card_number" name="card_number" required>
+    <div class="container" style="display: none;" id="contentContainer">
+        <!-- Glitch Header -->
+        <div class="glitch" data-text="SpoilersHUB">SpoilersHUB</div>
+        <p class="welcome" id="welcomeMessage">Welcome, User</p>
 
-      <label for="exp_date">Expiration Date (MM/YY):</label>
-      <input type="text" id="exp_date" name="exp_date" required>
+        <!-- Profile -->
+        <div class="profile"></div>
 
-      <label for="cvv">CVV:</label>
-      <input type="text" id="cvv" name="cvv" required>
+        <!-- Buttons -->
+        <a href="https://whatsapp.com/channel/0029VanUeKpAO7RQPKNhgH22">
+            <button class="btn">WhatsApp Channel</button>
+        </a>
+        <a href="https://youtube.com/@spoilershub0">
+            <button class="btn">YouTube Tutorials</button>
+        </a>
+        <a href="https://t.me/SpoilersHub">
+            <button class="btn">Telegram</button>
+        </a>
+        <a href="https://signal.me/#eu/-M7WxjcrxRg1MzbYSnUVjvgWNlj1_TgqcjYVIzpJk20lxEmNnltDjYykoH4TE1we">
+            <button class="btn">Contact Us</button>
+        </a>
 
-      <input type="submit" value="Pay Now">
-    </form>
+        <!-- Footer -->
+        <footer>
+            Designed by ꯱ystem~ׅ꯱poiler
+        </footer>
+    </div>
 
-    <p class="footer-note">Your payment is secure and encrypted.</p>
-  </div>
+    <!-- JavaScript for Animations -->
+    <script>
+        const canvas = document.getElementById('matrix');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
 
-  <script>
-    // Show Payment Form after Email Form Submission
-    document.getElementById('email-form').onsubmit = function(event) {
-      event.preventDefault(); // Prevent form submission
-      const email = document.getElementById('email').value;
-      document.getElementById('email-hidden').value = email; // Pass email to hidden input
-      document.getElementById('details-form').style.display = 'none';
-      document.getElementById('payment-form').style.display = 'block';
-    };
-  </script>
+        const characters = '0123456789ABCDEFGHIJKLMNOPQRSTUVXYZ'.split('');
+        const fontSize = 16;
+        const columns = canvas.width / fontSize;
+        const drops = Array(Math.ceil(columns)).fill(0);
+
+        function draw() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#00ff7f';
+
+            drops.forEach((y, x) => {
+                const text = characters[Math.floor(Math.random() * characters.length)];
+                ctx.fillText(text, x * fontSize, y * fontSize);
+
+                if (y * fontSize > canvas.height && Math.random() > 0.975) {
+                    drops[x] = 0;
+                }
+
+                drops[x]++;
+            });
+        }
+
+        setInterval(draw, 33);
+
+        function submitName() {
+            const name = document.getElementById('userName').value || 'User';
+            document.getElementById('welcomeMessage').innerText = `Welcome, ${name}`;
+            document.getElementById('namePrompt').style.display = 'none';
+            document.getElementById('contentContainer').style.display = 'block';
+        }
+
+        window.onload = function () {
+            setTimeout(() => {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('namePrompt').style.display = 'block';
+            }, 2000);
+        };
+    </script>
 </body>
 </html>
